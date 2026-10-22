@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First Step Action Plan — Visuals Agent Build</title>
+<style>
+:root {
+  --obsidian: #08080b;
+  --obsidian-2: #0e0e14;
+  --panel: rgba(255,255,255,.045);
+  --panel-2: rgba(255,255,255,.025);
+  --stroke: rgba(255,255,255,.10);
+  --crimson: #c8102e;
+  --crimson-soft: rgba(200,16,46,.16);
+  --gold: #d4af37;
+  --gold-soft: rgba(212,175,55,.14);
+  --ink: #e9e9ef;
+  --ink-dim: #a5a5b4;
+  --ink-faint: #6f6f80;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1100px 700px at 15% -10%, rgba(200,16,46,.16), transparent 60%),
+    radial-gradient(900px 600px at 92% 4%, rgba(212,175,55,.10), transparent 62%),
+    var(--obsidian);
+  color: var(--ink);
+  font: 16px/1.65 -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 90px;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* nav */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  background: rgba(8,8,11,.84); border-bottom: 1px solid var(--stroke);
+}
+nav .wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+nav .brand { font-weight: 700; letter-spacing: .02em; margin-right: 14px; font-size: 14px; }
+nav .brand span { color: var(--gold); }
+nav a {
+  color: var(--ink-dim); text-decoration: none; font-size: 12.5px;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
+}
+nav a:hover { color: var(--ink); border-color: var(--stroke); background: var(--panel); }
+
+/* header */
+header { padding: 64px 0 32px; }
+.eyebrow {
+  display: inline-block; font: 600 11px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); background: var(--gold-soft); border: 1px solid rgba(212,175,55,.3);
+  padding: 7px 13px; border-radius: 999px; margin-bottom: 20px;
+}
+h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; margin: 0 0 16px; letter-spacing: -.02em; font-weight: 800; }
+h1 em { font-style: normal; color: var(--gold); }
+.lede { font-size: 18px; color: var(--ink-dim); max-width: 78ch; margin: 0 0 24px; }
+
+/* callout */
+.callout {
+  border-left: 3px solid var(--gold); background: var(--gold-soft);
+  padding: 20px 24px; border-radius: 0 14px 14px 0; margin: 26px 0; color: #f0e6cd;
+}
+.callout b { color: #fff; }
+
+/* step cards */
+.step-container { margin-top: 36px; display: flex; flex-direction: column; gap: 20px; }
+.step-card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--stroke); border-radius: 18px; padding: 26px 28px;
+  backdrop-filter: blur(8px);
+  position: relative;
+}
+.step-card.primary { border-color: rgba(212,175,55,.4); }
+.step-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+.step-num { font: 700 12px/1 var(--mono); color: var(--crimson); text-transform: uppercase; letter-spacing: .1em; }
+.step-badge {
+  background: rgba(212,175,55,.15); color: var(--gold); border: 1px solid rgba(212,175,55,.3);
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.step-card h3 { margin: 0 0 10px; font-size: 22px; color: #fff; font-weight: 700; }
+.step-card p { margin: 0 0 14px; color: var(--ink-dim); font-size: 14.5px; line-height: 1.6; }
+
+.item-list { margin: 12px 0 0 18px; padding: 0; color: var(--ink-dim); font-size: 13.5px; }
+.item-list li { margin-bottom: 8px; }
+.item-list strong { color: #fff; }
+
+.path-box {
+  background: rgba(0,0,0,.6); border: 1px dashed rgba(212,175,55,.3);
+  padding: 10px 14px; border-radius: 8px; font-family: var(--mono); font-size: 12px; color: var(--gold);
+  margin-top: 14px; word-break: break-all;
+}
+
+/* 3 options comparison */
+.options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 18px; margin-top: 24px; }
+.opt-box {
+  background: var(--obsidian-2); border: 1px solid var(--stroke); border-radius: 14px; padding: 22px;
+}
+.opt-box.featured { border-color: var(--gold); background: rgba(212,175,55,.03); }
+.opt-tag { font: 700 11px/1 var(--mono); color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+.opt-box h4 { margin: 0 0 10px; font-size: 18px; color: #fff; }
+.opt-box p { font-size: 13.5px; color: var(--ink-dim); margin-bottom: 12px; line-height: 1.5; }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span>⚡</span> AGENT BUILDER BLUEPRINT</div>
+    <a href="#immediate">Immediate Move</a>
+    <a href="#options">3 Execution Paths</a>
+    <a href="#architecture">Step-by-Step Build</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header id="immediate">
+    <div class="eyebrow">Visuals Mastery • Phase 1 Execution Plan</div>
+    <h1>The First Thing We Should Do: <em>Build The Headless Engine</em></h1>
+    <p class="lede">
+      In the <strong>Agent Builder Operating System</strong>, rule number one is: <em>"Build the lever, not the manual workaround."</em> If we create an agent that tells you to open Canva by hand, we have failed. The absolute first move is to build the <strong>Headless Visual Generator</strong> and scaffold the <strong>`visuals-agent`</strong> folder room so a single command produces finished visual assets.
+    </p>
+  </header>
+
+  <div class="callout">
+    <b>The Recommended 30-Minute Sprint:</b>
+    We immediately build <strong>`generate_visual.py`</strong> (supporting the top 3 high-converting templates: <em>Maturity Then vs. Now</em>, <em>Cross Out Limiting Belief</em>, and <em>Friendly Reminder Sticky Note</em>) and scaffold <strong>`endpoint-media-agent-systemgentsisuals-agent\`</strong>. We will run our first live test right away using one of Bishop Joshua Simeon's prayer decrees or an Empire Digital business lesson.
+  </div>
+
+  <!-- SECTION: THE 3 PATHS -->
+  <section id="options">
+    <h2 style="font-size: 24px; margin-bottom: 8px;">Pick Your Tactical Entry Point</h2>
+    <p style="color: var(--ink-dim); margin-bottom: 20px;">Here are the three ways we can start right now:</p>
+
+    <div class="options-grid">
+      <div class="opt-box featured">
+        <div class="opt-tag">⭐ Recommended (Fastest ROI)</div>
+        <h4>Option 1: The Zero-Canva Code Engine</h4>
+        <p>Build <code>generate_visual.py</code> + the <code>visuals-agent</code> folder room. Test it immediately on disk by rendering a real graphic in Obsidian Dark & Notebook Paper themes, plus an auto-generated 7-second Lo-Fi Reel.</p>
+        <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Time to first asset: ~10 minutes</span>
+      </div>
+
+      <div class="opt-box">
+        <div class="opt-tag">Option 2 (Church Ops)</div>
+        <h4>Option 2: Sermon-to-Visuals Pipeline</h4>
+        <p>Wire the engine directly into <code>church youtube\</code>. Take decrees from Bishop Joshua Simeon's 90 Days Prevailing Prayers transcripts and output 5 daily Instagram quote cards for Command of Faith Church.</p>
+        <span style="font-size: 12px; color: var(--ink-dim); font-weight: 600;">Focus: Immediate Church media fulfillment</span>
+      </div>
+
+      <div class="opt-box">
+        <div class="opt-tag">Option 3 (Agency Revenue)</div>
+        <h4>Option 3: Empire Digital Client Offer</h4>
+        <p>Draft the high-ticket B2B service offer ("Authority Theme Page in a Box" — 30 visuals + 30 Reels/month) and build the client intake wireframe in <code>client_brief.json</code>.</p>
+        <span style="font-size: 12px; color: var(--ink-dim); font-weight: 600;">Focus: Monetization & B2B retainers</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: STEP BY STEP EXECUTION -->
+  <section id="architecture">
+    <h2 style="font-size: 24px; margin-bottom: 8px;">The Exact 3-Step Execution Checklist for Option 1</h2>
+    <p style="color: var(--ink-dim); margin-bottom: 24px;">If you greenlight Option 1, here is what happens immediately:</p>
+
+    <div class="step-container">
+      <div class="step-card primary">
+        <div class="step-header">
+          <span class="step-num">Step 1 • The Headless Generator Tool</span>
+          <span class="step-badge">In-Code Canvas Engine</span>
+        </div>
+        <h3>Build `tools\generate_visual.py` (Zero-Token SVG/PNG Engine)</h3>
+        <p>
+          Write a Python script that renders pixel-perfect $1080	imes 1080$ graphics with zero Canva dependencies. Implements:
+        </p>
+        <ul class="item-list">
+          <li><strong>Template A: Then vs. Now</strong> (Side-by-side maturity polarity: red/muted past vs. gold/white breakthrough).</li>
+          <li><strong>Template B: Cross Out Limiting Belief</strong> (Strikethrough misconception with bold truth below).</li>
+          <li><strong>Template C: Sticky Note Axiom</strong> (Handwritten font on warm Post-it note texture).</li>
+          <li><strong>Themes:</strong> Pure Obsidian Black (`#000000`) and Crisp Lined Paper.</li>
+        </ul>
+        <div class="path-box">D:\VIBE CODING\MANUS\planning-with-files	ools\generate_visual.py</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-num">Step 2 • The Folder-Agent Scaffold</span>
+          <span class="step-badge">Endpoint Media Fleet</span>
+        </div>
+        <h3>Create `endpoint-media-agent-systemgentsisuals-agent\`</h3>
+        <p>
+          Set up the autonomous folder room following the Agent Builder pattern:
+        </p>
+        <ul class="item-list">
+          <li><code>AGENT_ENTRY.md</code> — Quick operational interface and intake prompt.</li>
+          <li><code>identity.md</code> — Mission, inputs, outputs, and the Rule of 5-3 bar.</li>
+          <li><code>ROUTER.md</code> — Route between ideation, single asset render, and batch reel creation.</li>
+          <li><code>referencesisual-frameworks-18.md</code> — The complete 18 blueprints (#Hustle30).</li>
+          <li>Update <code>AGENT_REGISTRY.csv</code> to register <code>visuals-agent</code> as <strong>live</strong>.</li>
+        </ul>
+        <div class="path-box">D:\VIBE CODING\MANUS\planning-with-files\endpoint-media-agent-systemgentsisuals-agent\</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-num">Step 3 • The First Real Human Test Asset</span>
+          <span class="step-badge">Verification Gate</span>
+        </div>
+        <h3>Generate & Playback Live Test Asset #01</h3>
+        <p>
+          Run a real command against the newly built tool, generate the first $1080	imes 1080$ PNG, compile its companion 7-second Lo-Fi Reel, and pop both open on your screen to prove the system works.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

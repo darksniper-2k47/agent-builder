@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Agents — What The Library Can Actually Build</title>
+<style>
+:root{
+  --obsidian:#08080b;
+  --obsidian-2:#0e0e14;
+  --panel:rgba(255,255,255,.045);
+  --panel-2:rgba(255,255,255,.025);
+  --stroke:rgba(255,255,255,.10);
+  --crimson:#c8102e;
+  --crimson-soft:rgba(200,16,46,.16);
+  --gold:#d4af37;
+  --gold-soft:rgba(212,175,55,.14);
+  --ink:#e9e9ef;
+  --ink-dim:#a5a5b4;
+  --ink-faint:#6f6f80;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1100px 700px at 15% -10%, rgba(200,16,46,.16), transparent 60%),
+    radial-gradient(900px 600px at 92% 4%, rgba(212,175,55,.10), transparent 62%),
+    var(--obsidian);
+  color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+/* nav */
+nav{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(8,8,11,.82);border-bottom:1px solid var(--stroke);
+}
+nav .wrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:11px;padding-bottom:11px}
+nav .brand{font-weight:700;letter-spacing:.02em;margin-right:14px;font-size:14px}
+nav .brand span{color:var(--gold)}
+nav a{
+  color:var(--ink-dim);text-decoration:none;font-size:12.5px;
+  padding:6px 11px;border-radius:999px;border:1px solid transparent;white-space:nowrap;
+}
+nav a:hover{color:var(--ink);border-color:var(--stroke);background:var(--panel)}
+
+/* hero */
+header{padding:74px 0 42px}
+.eyebrow{
+  display:inline-block;font:600 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);background:var(--gold-soft);border:1px solid rgba(212,175,55,.3);
+  padding:7px 13px;border-radius:999px;margin-bottom:20px;
+}
+h1{font-size:clamp(30px,5.2vw,52px);line-height:1.08;margin:0 0 18px;letter-spacing:-.022em;font-weight:700}
+h1 em{font-style:normal;color:var(--gold)}
+.lede{font-size:18px;color:var(--ink-dim);max-width:76ch;margin:0 0 12px}
+.lede strong{color:var(--ink);font-weight:600}
+
+.readout{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:32px;
+}
+.readout div{
+  background:var(--panel);border:1px solid var(--stroke);border-radius:13px;padding:15px 16px;
+}
+.readout b{display:block;font-size:23px;color:var(--gold);font-weight:700;line-height:1.2}
+.readout small{color:var(--ink-faint);font-size:11.5px;letter-spacing:.03em;text-transform:uppercase}
+
+/* sections */
+section{padding:44px 0;border-top:1px solid rgba(255,255,255,.055)}
+h2{font-size:clamp(21px,3vw,30px);margin:0 0 8px;letter-spacing:-.015em;font-weight:700}
+h2 .num{font:600 12px/1 var(--mono);color:var(--crimson);vertical-align:super;margin-right:9px;letter-spacing:.1em}
+.sub{color:var(--ink-dim);margin:0 0 28px;max-width:78ch}
+
+/* callout */
+.callout{
+  border-left:3px solid var(--crimson);background:var(--crimson-soft);
+  padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0;color:#f2dfe2;
+}
+.callout.gold{border-left-color:var(--gold);background:var(--gold-soft);color:#f0e6cd}
+.callout b{color:#fff}
+
+/* source grid */
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:13px}
+.src{
+  background:var(--panel-2);border:1px solid var(--stroke);border-radius:13px;padding:16px 17px;
+}
+.src h4{margin:0 0 4px;font-size:14.5px;font-weight:650}
+.src .tag{font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:9px}
+.src p{margin:0;font-size:13px;color:var(--ink-dim);line-height:1.55}
+
+/* agent cards */
+.agent{
+  background:linear-gradient(180deg,var(--panel),var(--panel-2));
+  border:1px solid var(--stroke);border-radius:17px;padding:24px 25px;margin-bottom:17px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.agent.hero-pick{border-color:rgba(212,175,55,.42);box-shadow:0 0 0 1px rgba(212,175,55,.1),0 18px 50px -30px rgba(212,175,55,.5)}
+.ahead{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.anum{
+  flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  font:700 14px/1 var(--mono);color:var(--gold);background:var(--gold-soft);border:1px solid rgba(212,175,55,.32);
+}
+.agent h3{margin:4px 0 0;font-size:19px;font-weight:680;letter-spacing:-.01em;flex:1 1 240px}
+.pill{
+  font:600 10px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;
+  padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);color:var(--ink-dim);white-space:nowrap;
+}
+.pill.new{color:var(--gold);border-color:rgba(212,175,55,.35);background:var(--gold-soft)}
+.pill.feed{color:#8fd0ff;border-color:rgba(143,208,255,.28);background:rgba(143,208,255,.1)}
+.job{color:var(--ink-dim);margin:12px 0 18px;font-size:15px}
+.job b{color:var(--ink)}
+
+.rows{display:grid;gap:11px}
+.row{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:start}
+.row .k{
+  font:600 10.5px/1.5 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);padding-top:2px;
+}
+.row .v{font-size:14px;color:var(--ink-dim);line-height:1.6}
+.row .v strong{color:var(--ink);font-weight:600}
+.row.knows .v{color:#cfcfda}
+.row.today{border-top:1px dashed rgba(255,255,255,.1);padding-top:12px;margin-top:3px}
+.row.today .k{color:var(--crimson)}
+.row.today .v{color:#f0dade}
+code{
+  font:12.5px/1.4 var(--mono);background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);padding:1.5px 6px;border-radius:5px;color:#e4d9b4;
+}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--stroke);border-radius:13px;background:var(--panel-2)}
+table{border-collapse:collapse;width:100%;min-width:660px;font-size:13.5px}
+th,td{padding:12px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
+th{font:600 10.5px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:rgba(212,175,55,.05)}
+td{color:var(--ink-dim)}
+td strong{color:var(--ink)}
+tr:last-child td{border-bottom:none}
+
+/* order list */
+ol.build{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:13px}
+ol.build li{
+  counter-increment:s;position:relative;padding:16px 20px 16px 58px;
+  background:var(--panel-2);border:1px solid var(--stroke);border-radius:13px;
+}
+ol.build li::before{
+  content:counter(s);position:absolute;left:17px;top:16px;
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  font:700 12px/1 var(--mono);color:var(--obsidian);background:var(--gold);
+}
+ol.build b{display:block;color:var(--ink);font-size:15px;margin-bottom:3px}
+ol.build span{font-size:13.5px;color:var(--ink-dim)}
+
+/* skip */
+.skip{display:grid;gap:10px}
+.skip div{
+  background:rgba(255,255,255,.02);border:1px solid var(--stroke);border-left:3px solid var(--ink-faint);
+  border-radius:0 11px 11px 0;padding:13px 17px;font-size:13.5px;color:var(--ink-dim);
+}
+.skip b{color:var(--ink)}
+
+footer{padding:44px 0 66px;border-top:1px solid rgba(255,255,255,.055);color:var(--ink-faint);font-size:13px}
+footer code{color:var(--ink-dim)}
+
+@media (max-width:640px){
+  .row{grid-template-columns:1fr;gap:3px}
+  .row .k{padding-top:0}
+  header{padding:48px 0 30px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">BUSINESS <span>AGENTS</span></div>
+    <a href="#read">What I read</a>
+    <a href="#verdict">The verdict</a>
+    <a href="#agents">The 6 specialists</a>
+    <a href="#feeds">Feeds existing agents</a>
+    <a href="#order">Build order</a>
+    <a href="#skip">What I'd skip</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <div class="eyebrow">Knowledge audit · 9 courses · agent-builder</div>
+  <h1>You don't need a COO agent.<br>You need a <em>deal desk</em>.</h1>
+  <p class="lede">I went through every <code>_ingest</code> pack in <strong>BUSINESS\</strong> plus the two Hormozi packs — not the summaries, the full frameworks and SOPs files. The library is not a "business advice" library. It's a <strong>money-mechanics</strong> library: how to price a thing, how to fill a calendar, how to survive a "that's too expensive", and how to not lose the client in month two.</p>
+  <p class="lede">That maps to <strong>one new agent with six specialists</strong> — not nine agents. Here's the read.</p>
+
+  <div class="readout">
+    <div><b>9</b><small>Courses read</small></div>
+    <div><b>45</b><small>_ingest files</small></div>
+    <div><b>~170</b><small>GenFlow source files</small></div>
+    <div><b>6</b><small>Specialists proposed</small></div>
+    <div><b>1</b><small>To build first</small></div>
+  </div>
+</header>
+
+<section class="wrap" id="read">
+  <h2><span class="num">01</span>What's actually in the library</h2>
+  <p class="sub">Nine courses, but only five distinct capabilities. Two courses are almost the same knowledge twice, and one is off your path entirely.</p>
+
+  <div class="sources">
+    <div class="src">
+      <span class="tag">The spine · agency ops</span>
+      <h4>GenFlow — Agency Insider</h4>
+      <p>The most operational thing you own. Lead qualification (ACP/IAP, Meta-pixel check), 4-part hot outreach, DM frameworks, the two-call sale, the MVP pitch deck (never show price on call one), bottom-up pricing, 8-step onboarding, comms SLAs, weekly + monthly client reporting, the 7-step hire, the 6-section JD, SOP library governance. Explicitly <em>anti</em>-Hormozi on offers.</p>
+    </div>
+    <div class="src">
+      <span class="tag">The money math</span>
+      <h4>Hormozi — Playbooks + Money Models</h4>
+      <p>Grand Slam Offer, Value Equation, four guarantee types, MAGIC naming. Then the sequencing engine: 5 attraction + 4 upsell + 3 downsell + 3 continuity offer types, each with real guardrails (upsell ≥4x the credit, cap Buy-X-Get-Y at 10% of base, only run Win-Your-Money-Back under 5% refunds). Plus CAC, gross profit, payback period, LTGP:CAC ≥ 3:1, Client-Financed Acquisition. Plus the ad assembly line (50 hooks × 3-5 meats × 1-3 CTAs) and the Fast Cash Play.</p>
+    </div>
+    <div class="src">
+      <span class="tag">The diagnostic</span>
+      <h4>Jeremy Haynes — Million-Dollar Months</h4>
+      <p>Financial modelling of a funnel step by step, then "the doubles game" — find the one stat easiest to double. Benchmarks, pixel conditioning, the hammer-them pre-call content flood, scaling cadences (10-30%/day, cost-per-X, surfing), FTC rule: never an amount plus a timeframe.</p>
+    </div>
+    <div class="src">
+      <span class="tag">The DM close</span>
+      <h4>Nik Setting — High-Ticket Coaching</h4>
+      <p>Profile funnel, story-sequence structure (curiosity → obstacle → statement → belief shift → transition → close), reverse-risk DM close, perceived-value tiering + instant downsell, 80/20 productized delivery, the labor pyramid, price at 10-20% of value created.</p>
+    </div>
+    <div class="src">
+      <span class="tag">The inbound engine</span>
+      <h4>B2B YouTube + Ben Bader</h4>
+      <p>YouTube sales funnel (50/30/20 buckets), the free-course VSL, the 11-question client interview, Dream 100 outreach, good-vs-bad cold DM checklists, agency pricing ladder and hiring order. Ben Bader adds the cohort method, the 7-day launch, and the sharpest copy psychology in the whole library (installing beliefs, old-way/new-way, depersonalising the negative).</p>
+    </div>
+    <div class="src">
+      <span class="tag">The research kit</span>
+      <h4>Internet Pipes</h4>
+      <p>Free-tool market validation. Information hierarchy: survey data &lt; search data &lt; sales data. Competitor teardown via Similar Web, Wappalyzer, Meta Ad Library, 2-and-3-star reviews. Generate → Validate → Evaluate → Differentiate.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Honest flag:</b> GenFlow and Hormozi contradict each other on offers. GenFlow says never guarantee, never use scarcity gimmicks, price bottom-up from your real cost. Hormozi says guarantee hard, stack scarcity, price to willingness-to-pay. That's not a problem — it's the most useful thing in the library. Any offer agent has to be built to <b>hold both</b> and pick based on whether you have proof yet. Right now, with small Cape Town trades, you're GenFlow. Once you have three case studies, you're Hormozi.
+  </div>
+</section>
+
+<section class="wrap" id="verdict">
+  <h2><span class="num">02</span>The verdict</h2>
+  <p class="sub">You already have Strategist, Content, Media Buyer, Video Editor, Dating Wingman and Agent Builder. Adding nine more top-level agents would wreck your router. The library doesn't ask for nine agents anyway.</p>
+
+  <div class="callout gold">
+    <b>One new agent: <code>agents\business-agent\</code></b> — the commercial brain. Six specialist contracts underneath it, exactly like Media Buyer's specialist pattern. Two more chunks of the library feed agents you already have instead of becoming new ones.
+  </div>
+
+  <p class="sub" style="margin-top:26px">Why one agent and not six: every specialist below reads the same three things first — who the client is, what they pay, what it costs you to deliver. Split them into separate agents and you re-derive that context six times. Keep them under one roof and the offer specialist can hand its price straight to the pitch specialist and the retention specialist.</p>
+</section>
+
+<section class="wrap" id="agents">
+  <h2><span class="num">03</span>The six specialists</h2>
+  <p class="sub">Each one is a real job you're doing badly-or-manually right now. "Does this week" is the actual thing on your plate.</p>
+
+  <!-- 1 -->
+  <div class="agent hero-pick">
+    <div class="ahead">
+      <div class="anum">01</div>
+      <h3>Offer &amp; Price Desk</h3>
+      <span class="pill new">Build this first</span>
+    </div>
+    <p class="job"><b>Job:</b> turn "I want R10k for this website" into a defensible priced offer — with a scope, a guarantee you can actually honour, a downsell ladder, and a payment structure — plus the maths that says whether it's worth doing.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">GenFlow bottom-up pricing (<code>Hourly Rate × Hours + Additional Costs</code>, then ~30% net margin; base vs base+performance) · Hormozi Value Equation, 5-step Grand Slam build, four guarantee types, MAGIC naming · Money Models CAC / gross profit / payback / LTGP:CAC ≥ 3:1 · the full downsell tree (payment plan → feature downsell → trial) with its numeric guardrails · Nik's perceived-value tiering and 10-20%-of-value-created rule.</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A one-page offer sheet: scope, price, what's excluded, the guarantee wording, tier 2 and tier 3 fallbacks, and payment terms. Plus a small numbers block — your real delivery cost, margin, and how many of these you need for the month.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">Prices the KANS Electrical job properly instead of "R10-15k". Builds the standing website-retainer offer you keep re-inventing per Meta lead.</div></div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">02</div>
+      <h3>Deal Flow (client acquisition)</h3>
+      <span class="pill new">New specialist</span>
+    </div>
+    <p class="job"><b>Job:</b> fill the calendar. Qualify a lead before you spend an hour on it, then write outreach that gets a reply, then chase it on a schedule instead of vibes.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">GenFlow lead analysis (site quality, socials, Google presence, <b>is there a Meta pixel</b> = they already spend on ads) · budget/authority/need/timeline screen · the 4-part hot outreach (problem → value → who you are → one question) · four DM frameworks with the hard rules (never sell in the first DM, never ask for a call, never send a video) · the Day 0 / 2 / 5 / 10 follow-up sequence with a <em>new angle</em> on day 5 · Hormozi's Core Four and Rule of 100 · Dream 100 free-work outreach · the good-vs-bad cold DM checklist.</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A scored lead list (fake / bad / good / high-potential), a personalised first message per lead, the day-2/5/10 follow-ups pre-written, and a simple pipeline row per lead.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">Works the Cape Town trades you already have contact with. Turns the "hiring a marketer" and "already running Meta ads" signals into a qualified list instead of cold spray.</div></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">03</div>
+      <h3>Pitch &amp; Close</h3>
+      <span class="pill new">New specialist</span>
+    </div>
+    <p class="job"><b>Job:</b> run the call. Build a pitch that's about <em>their</em> business, hold the price back until call two, and have a scripted move ready for every version of "that's too much".</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">GenFlow two-call structure and the MVP deck (10-20 slides, their logo from slide one, 2-3 problems you've spotted, objections as their own slides, <b>never a price in the deck</b>) · Claim / Approach / Proof / Market messaging · the four client types and how to talk to each · Nik's reverse-risk close and instant downsell · Hormozi's payment-plan downsell (7 steps), feature downsell, and the "never negotiate the price, change what they get" rule · Ben Bader's copy psychology for the framing.</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A tailored deck outline per prospect, a call-one script, and a printed objection tree — what you say, in order, when they balk.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">You've been showing finished demo sites and then guessing at the money conversation. This gives the demo a spine and stops you discounting on the spot.</div></div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">04</div>
+      <h3>Account &amp; Retention</h3>
+      <span class="pill new">New specialist</span>
+    </div>
+    <p class="job"><b>Job:</b> keep the client. GenFlow's whole thesis is that clients leave because of bad account management, not bad work — and the first 30 days set the tone.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">The 8-step onboarding (team email → welcome email → onboarding form → internal kickoff → client kickoff → admin → follow-up → execution) · the onboarding email that asks for the deposit <em>now</em> · the plain-English table-format agreement · comms SLAs (email within 1 business day, Slack max 2h, <b>always be the last to respond</b>) · meeting follow-up within 30 minutes · weekly update email with a fixed subject line + monthly report with a green/amber/red status table · Hormozi's churn checklist and the 5 horsemen.</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A filled onboarding pack per signed client, a weekly update email draft, a monthly report, and a churn-risk flag when a client goes quiet.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">Every client site you've built has a CONFIRM-BEFORE-LAUNCH list and no follow-up rhythm. This is the difference between a once-off R10k and a retainer.</div></div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">05</div>
+      <h3>Numbers &amp; Bottleneck</h3>
+      <span class="pill new">New specialist</span>
+    </div>
+    <p class="job"><b>Job:</b> given real numbers, say which single thing to fix. Not a dashboard — a verdict.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">Jeremy's funnel modelling (CPM → CTR → cost per application → show rate → close rate → AOV → ROAS) and the doubles game — find the stat easiest to double, and prefer the top of the funnel because it compounds · marketing knobs vs people stuff · Money Models payback period and Client-Financed Acquisition · Hormozi's constraint thinking (attack one thing, front-to-back, one test per week).</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A one-screen model of the funnel with your real numbers in it, the named bottleneck, and one action. Refuses to answer without real numbers — that's the point.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">Feeds Media Buyer directly. When a client campaign underperforms, this decides whether it's the creative, the landing page or the follow-up — before you rebuild anything.</div></div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">06</div>
+      <h3>Market &amp; Competitor Recon</h3>
+      <span class="pill new">New specialist</span>
+    </div>
+    <p class="job"><b>Job:</b> before you build anything for a client or a niche, find out what's actually being searched, sold and complained about.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Knows</div><div class="v">Internet Pipes' Generate → Validate → Evaluate → Differentiate funnel and the information hierarchy (survey &lt; search &lt; sales) · actively look to <em>invalidate</em> · competitor teardown via Similar Web, Wappalyzer, Meta Ad Library (long-running ads = winners), 2-and-3-star reviews · GenFlow's four-level competitor analysis (offer / funnel / ads / content) · Nik's Capital-Pain-Access market test.</div></div>
+      <div class="row"><div class="k">Produces</div><div class="v">A short recon brief: what the market searches, who's already running ads and what they say, what customers complain about, and the one gap you can lead with.</div></div>
+      <div class="row today"><div class="k">Does this week</div><div class="v">This is the thing that found PM Technologies' buried solar line from their own photos — except systematised, so it happens every time instead of by accident.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="feeds">
+  <h2><span class="num">04</span>Two chunks that feed agents you already have</h2>
+  <p class="sub">Don't build these as agents. They're knowledge, and it belongs somewhere that already exists.</p>
+
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">→</div>
+      <h3>Hooks, ads and copy → <code>media-buyer</code> and <code>content-agent</code></h3>
+      <span class="pill feed">Knowledge feed</span>
+    </div>
+    <p class="job">Hormozi's Hooks and GOATed Ads playbooks are the strongest ad-production material in the library and they belong where ads get made — not in a new agent.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Adds</div><div class="v">The ad assembly line (50 hooks × 3-5 meats × 1-3 CTAs, 80% of your time on hooks) · 8 verbal hook types · hook-driver by awareness level (most aware = offer, unaware = curiosity) · the 70-20-10 batch rule and the hook spreadsheet · the five ad-meat formats · CTA testing (same hook and meat, change only the CTA) · GenFlow's Ad Grid and the four copy frameworks · Ben Bader's belief installation and old-way/new-way · the FTC rule — never an amount plus a timeframe.</div></div>
+    </div>
+  </div>
+
+  <div class="agent">
+    <div class="ahead">
+      <div class="anum">→</div>
+      <h3>SOPs, hiring and delegation → the planned <code>operator-agent</code></h3>
+      <span class="pill feed">Knowledge feed</span>
+    </div>
+    <p class="job">Real material, wrong time. You're a solo operator at 2K/month — you don't have anyone to hire yet. Bank it against the operator-agent and build it when there's a second person.</p>
+    <div class="rows">
+      <div class="row knows"><div class="k">Holds</div><div class="v">GenFlow's SOP rollout governance (only 1-2 new processes at a time, "slow down to speed up"), the process library map, the 7-step hire, the 6-section JD with a task as the filter, Asana delivery + workload boards, daily standup and end-of-day report · Nik's 80/20 productized infrastructure and labor pyramid · the content agency's hiring order and editor deadline buffer.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="order">
+  <h2><span class="num">05</span>Build order</h2>
+  <p class="sub">One at a time, each proven on a real job before the next. Same rule as the rest of the system.</p>
+
+  <ol class="build">
+    <li><b>Offer &amp; Price Desk</b><span>Because every other specialist needs a price to exist. And because you're actively guessing prices on live leads right now — this one pays for itself on the next quote.</span></li>
+    <li><b>Pitch &amp; Close</b><span>You already generate leads through Meta ads. The gap is what happens on the call. Prove it on one real prospect.</span></li>
+    <li><b>Account &amp; Retention</b><span>The moment one of those closes. This is what converts a once-off build into monthly income — which is the actual 5-10K ZAR goal.</span></li>
+    <li><b>Deal Flow</b><span>Once the close and the keep are working, turn up the top of the funnel. Not before — filling a calendar you can't convert is just noise.</span></li>
+    <li><b>Numbers &amp; Bottleneck</b><span>Needs real historic numbers to be worth anything. By step 5 you'll have them.</span></li>
+    <li><b>Market &amp; Competitor Recon</b><span>Useful throughout, but it's a nice-to-have until the money loop works. Build it when a niche decision is actually on the table.</span></li>
+  </ol>
+
+  <div class="callout gold">
+    <b>What "step 1" actually looks like:</b> <code>agents\business-agent\</code> with an <code>AGENT_ENTRY.md</code>, <code>ROUTER.md</code>, <code>rules.md</code>, <code>state.md</code>, and exactly one specialist contract — <code>specialists\offer-price-desk.md</code> — pointed at the GenFlow, Money Models and Hormozi Playbooks <code>_ingest</code> paths. Registered in <code>SYSTEM_ROUTER.md</code> and <code>AGENT_REGISTRY.csv</code>. Nothing else until you've run a real quote through it.
+  </div>
+</section>
+
+<section class="wrap" id="skip">
+  <h2><span class="num">06</span>What I would not build</h2>
+  <p class="sub">Being straight about what's in there and doesn't earn a slot.</p>
+
+  <div class="skip">
+    <div><b>A COO / CEO agent.</b> You scratched it and you were right. "COO" is a title, not a job — it collapses into "answer any business question", which is what Strategist already does. The library's value is in specific, checkable procedures, and a COO agent would blur all of them into advice.</div>
+    <div><b>The Shkreli Pill as an agent.</b> Genuinely good material — DCF, enterprise value, reading a 10-K, options mechanics — and completely off your path. It's for analysing public equities. There's no job in your week that needs it. Leave it in the library.</div>
+    <div><b>A YouTube-growth agent.</b> The B2B YouTube material is strong, but it overlaps <code>content-agent</code> heavily and it's a 6-12 month play. It's a knowledge feed at best until the money loop is running.</div>
+    <div><b>A separate copy-agent right now.</b> Your roster already plans one. The copy material in this library (Ben Bader, GenFlow's PAS/BAB/AIDA/4Ps, Hormozi hooks) is better used inside Media Buyer and Content Agent than as a seventh top-level agent competing with them for routing.</div>
+    <div><b>Anything Etsy-stealth-account shaped.</b> GenFlow ships a grey-hat bonus PDF on fake identities, proxies and burner banking. It's flagged as off-topic in the ingest and it stays out of every agent.</div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p><b>Sources read in full:</b> <code>D:\100CANON\Drive\G drive\BUSINESS\</code> — GenFlow Agency Insider, Ben Bader Info Product Agency, Jeremy Haynes Million-Dollar Months, Nik Setting High-Ticket Coaching, Scaling Content Agencies / B2B YouTube, Internet Pipes, The Shkreli Pill. Plus <code>D:\100CANON\Drive\G drive\MARKETING\</code> — Alex Hormozi PLAYBOOKS and 100M Money Models Course.</p>
+  <p>Proposal lives at <code>D:\VIBE CODING\MANUS\planning-with-files\endpoint-media-agent-system\agents\agent-builder\business-agents-proposal.html</code></p>
+  <p style="color:var(--ink-faint)">Nothing built yet. This is the read and the recommendation — your call on what gets built and in what order.</p>
+</footer>
+
+</body>
+</html>

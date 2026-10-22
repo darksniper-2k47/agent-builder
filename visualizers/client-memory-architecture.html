@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Memory Layer — Architecture</title>
+<style>
+:root{
+  --obsidian:#08080b;--panel:rgba(255,255,255,.045);--panel-2:rgba(255,255,255,.022);
+  --stroke:rgba(255,255,255,.10);--crimson:#c8102e;--crimson-soft:rgba(200,16,46,.15);
+  --gold:#d4af37;--gold-soft:rgba(212,175,55,.13);
+  --ink:#e9e9ef;--ink-dim:#a6a6b5;--ink-faint:#70708150;--ink-mute:#707081;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+  radial-gradient(1100px 700px at 12% -10%, rgba(200,16,46,.15), transparent 60%),
+  radial-gradient(900px 600px at 90% 3%, rgba(212,175,55,.10), transparent 62%),
+  var(--obsidian);
+  color:var(--ink);font:16px/1.65 -apple-system,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(8,8,11,.84);border-bottom:1px solid var(--stroke)}
+nav .wrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:11px 22px}
+nav .brand{font-weight:700;font-size:14px;margin-right:14px;letter-spacing:.02em}
+nav .brand span{color:var(--gold)}
+nav a{color:var(--ink-dim);text-decoration:none;font-size:12.5px;padding:6px 11px;
+  border-radius:999px;border:1px solid transparent;white-space:nowrap}
+nav a:hover{color:var(--ink);border-color:var(--stroke);background:var(--panel)}
+
+header{padding:72px 0 40px}
+.eyebrow{display:inline-block;font:600 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);background:var(--gold-soft);border:1px solid rgba(212,175,55,.3);
+  padding:7px 13px;border-radius:999px;margin-bottom:20px}
+h1{font-size:clamp(29px,5vw,50px);line-height:1.09;margin:0 0 18px;letter-spacing:-.022em;font-weight:700}
+h1 em{font-style:normal;color:var(--gold)}
+.lede{font-size:18px;color:var(--ink-dim);max-width:76ch;margin:0 0 12px}
+.lede strong{color:var(--ink);font-weight:600}
+
+section{padding:44px 0;border-top:1px solid rgba(255,255,255,.055)}
+h2{font-size:clamp(21px,3vw,30px);margin:0 0 8px;letter-spacing:-.015em;font-weight:700}
+h2 .num{font:600 12px/1 var(--mono);color:var(--crimson);vertical-align:super;margin-right:9px;letter-spacing:.1em}
+h3{font-size:17px;margin:30px 0 10px;font-weight:660;letter-spacing:-.01em}
+.sub{color:var(--ink-dim);margin:0 0 26px;max-width:80ch}
+p{max-width:82ch}
+
+.callout{border-left:3px solid var(--crimson);background:var(--crimson-soft);
+  padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0;color:#f2dfe2}
+.callout.gold{border-left-color:var(--gold);background:var(--gold-soft);color:#f0e6cd}
+.callout b{color:#fff}
+.callout code{background:rgba(0,0,0,.3)}
+
+code{font:12.5px/1.4 var(--mono);background:rgba(255,255,255,.06);border:1px solid var(--stroke);
+  padding:1.5px 6px;border-radius:5px;color:#e4d9b4}
+
+/* evidence */
+.ev{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px;margin-top:8px}
+.ev div{background:var(--panel-2);border:1px solid var(--stroke);border-left:3px solid var(--crimson);
+  border-radius:0 12px 12px 0;padding:15px 18px}
+.ev b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:5px}
+.ev p{margin:0;font-size:13.5px;color:var(--ink-dim);line-height:1.55}
+
+/* tree */
+.tree{background:#050508;border:1px solid var(--stroke);border-radius:14px;padding:22px 24px;
+  overflow-x:auto;font:13px/1.85 var(--mono);color:var(--ink-dim);margin:18px 0}
+.tree .d{color:var(--gold)}
+.tree .f{color:#9fd6ff}
+.tree .c{color:var(--ink-mute)}
+.tree .hot{color:#ff8c9e}
+
+/* file spec */
+.files{display:grid;gap:11px}
+.file{background:var(--panel-2);border:1px solid var(--stroke);border-radius:13px;padding:16px 19px;
+  display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.file .n{font:600 13px/1.5 var(--mono);color:var(--gold)}
+.file .d{font-size:14px;color:var(--ink-dim);line-height:1.6}
+.file .d strong{color:var(--ink);font-weight:600}
+.file .w{display:block;margin-top:7px;font:600 10.5px/1.4 var(--mono);letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-mute)}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--stroke);border-radius:13px;background:var(--panel-2);margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px}
+th,td{padding:12px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
+th{font:600 10.5px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);
+  background:rgba(212,175,55,.05)}
+td{color:var(--ink-dim)}
+td strong{color:var(--ink)}
+tr:last-child td{border-bottom:none}
+
+/* flow */
+.flow{display:grid;gap:12px;margin:18px 0}
+.step{background:var(--panel);border:1px solid var(--stroke);border-radius:13px;padding:15px 19px;
+  display:grid;grid-template-columns:30px 1fr;gap:15px;align-items:start}
+.step .i{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  font:700 12px/1 var(--mono);color:var(--obsidian);background:var(--gold)}
+.step .t{font-size:14px;color:var(--ink-dim);line-height:1.6}
+.step .t b{color:var(--ink);display:block;margin-bottom:2px;font-size:14.5px}
+
+/* ba comparison */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+.split>div{background:var(--panel-2);border:1px solid var(--stroke);border-radius:13px;padding:17px 19px}
+.split h4{margin:0 0 9px;font-size:14px;font-weight:660}
+.split.bad h4,.split>div.bad h4{color:#ff8c9e}
+.split>div.good h4{color:var(--gold)}
+.split p{margin:0;font-size:13.5px;color:var(--ink-dim);line-height:1.6}
+@media(max-width:700px){.split{grid-template-columns:1fr}.file{grid-template-columns:1fr;gap:4px}}
+
+ul.tick{list-style:none;padding:0;margin:14px 0;display:grid;gap:9px}
+ul.tick li{padding-left:26px;position:relative;font-size:14px;color:var(--ink-dim);line-height:1.6}
+ul.tick li::before{content:"";position:absolute;left:5px;top:9px;width:7px;height:7px;
+  border-radius:2px;background:var(--gold)}
+ul.tick li b{color:var(--ink)}
+
+footer{padding:44px 0 66px;border-top:1px solid rgba(255,255,255,.055);color:var(--ink-mute);font-size:13px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">CLIENT <span>MEMORY</span></div>
+    <a href="#why">The problem</a>
+    <a href="#shape">The shape</a>
+    <a href="#files">The five files</a>
+    <a href="#protocol">The protocol</a>
+    <a href="#brain">The business agent</a>
+    <a href="#first">Build first</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <div class="eyebrow">Architecture · endpoint-media-agent-system</div>
+  <h1>The client record has to live<br><em>above</em> the agents.</h1>
+  <p class="lede">You're describing one thing twice: <strong>stop re-explaining who a client is.</strong> Any agent you talk to — web, media buyer, content, video — should already know the client, what was built, what they paid, what was said last, and what they think of you.</p>
+  <p class="lede">Right now that context lives inside whichever agent happened to do the work. That's why it doesn't travel. The fix is to <strong>promote the client record to the system root</strong>, above every agent, and make reading it the first step of every boot.</p>
+</header>
+
+<section class="wrap" id="why">
+  <h2><span class="num">01</span>This is already breaking</h2>
+  <p class="sub">Not theoretical. Two things I found in your workspace just now:</p>
+
+  <div class="ev">
+    <div>
+      <b>Empire Digital exists twice</b>
+      <p>Once at <code>CLIENT WORK\Empire Digital\</code> (company info, invoices, playbook) and again at <code>media-buyer\outcomes\Empire Digital\</code> (campaign work). Neither knows the other exists. Ask Media Buyer about their invoicing and it can't answer.</p>
+    </div>
+    <div>
+      <b>PM Technologies has three invoices</b>
+      <p>R5500, R6150, and one with no amount in the filename. Nothing anywhere records which one was actually sent, agreed, or paid. That's your commercial history, and it's a guess.</p>
+    </div>
+    <div>
+      <b>Seven clients, seven different shapes</b>
+      <p>KANS has <code>CONTEXT.md</code> + <code>CONFIRM-BEFORE-LAUNCH.md</code> + a call sheet. Deltar has <code>CONTEXT.md</code> + <code>HANDOVER.html</code> + an invoice. Clean View Glass has a <code>DESIGN.md</code> and stock images. No two are the same, so nothing can read them generically.</p>
+    </div>
+    <div>
+      <b>The registry pattern exists but is trapped</b>
+      <p>Media Buyer already has exactly the right idea — <code>client-registry.csv</code> plus per-client index and state files. But it's locked inside Media Buyer and knows one client. That pattern needs promoting, not reinventing.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Note on Priscilla:</b> I searched and there's no Priscilla in the workspace, so I read her as your illustration, not the job. The real names are AT Solutions, Clean View Glass, Deltar Electrical, Empire Digital, KANS Electrical, PM Technologies, Wander — plus G&amp;A Mobile Detailing and Kudzai's Care elsewhere in the tree.
+  </div>
+</section>
+
+<section class="wrap" id="shape">
+  <h2><span class="num">02</span>The shape</h2>
+  <p class="sub">One folder per client, at the system root. It sits above every agent, so every agent can reach it.</p>
+
+<div class="tree">
+<span class="d">endpoint-media-agent-system\</span>
+├── SYSTEM_ROUTER.md            <span class="c">← gains a "resolve the client first" step</span>
+├── <span class="d">clients\</span>                    <span class="hot">← NEW. the shared memory</span>
+│   ├── <span class="f">CLIENT_REGISTRY.csv</span>      <span class="c">the index. every agent reads this first</span>
+│   ├── <span class="d">_TEMPLATE\</span>              <span class="c">what a new client folder looks like</span>
+│   ├── <span class="d">pm-technologies\</span>
+│   │   ├── <span class="f">CLIENT.md</span>           <span class="c">who they are. facts only</span>
+│   │   ├── <span class="f">THREAD.md</span>           <span class="c">every conversation, dated, both directions</span>
+│   │   ├── <span class="f">LEDGER.md</span>           <span class="c">quoted / agreed / invoiced / paid / owed</span>
+│   │   ├── <span class="f">WORK.md</span>             <span class="c">what each agent delivered + real paths</span>
+│   │   └── <span class="f">state.md</span>            <span class="c">where it stands. ONE next action. blockers</span>
+│   ├── <span class="d">kans-electrical\</span>
+│   ├── <span class="d">deltar-electrical\</span>
+│   └── <span class="d">empire-digital\</span>         <span class="c">reconciles both existing copies</span>
+│
+└── <span class="d">agents\</span>
+    ├── <span class="d">business-agent\</span>          <span class="hot">← NEW. reads clients\, answers commercial questions</span>
+    ├── <span class="d">media-buyer\</span>             <span class="c">keeps its campaign work, points at clients\</span>
+    ├── <span class="d">content-agent\</span>
+    ├── <span class="d">video-editor\</span>
+    └── <span class="d">web-agent\</span>               <span class="c">not built yet — inherits this on day one</span>
+</div>
+
+  <div class="callout gold">
+    <b>It points, it does not move.</b> The actual website code stays in <code>CLIENT WORK\PM Technologies\</code>. Media Buyer's campaign work stays in <code>outcomes\</code>. Nothing gets relocated — that would break your builds and your Vercel deploys. <code>WORK.md</code> holds full absolute paths to where the real files already live. This layer is memory, not storage.
+  </div>
+</section>
+
+<section class="wrap" id="files">
+  <h2><span class="num">03</span>The five files</h2>
+  <p class="sub">Small on purpose. Each has one job and a clear owner, so agents don't clobber each other.</p>
+
+  <div class="files">
+    <div class="file">
+      <div class="n">CLIENT.md</div>
+      <div class="d"><strong>Who they are.</strong> Business name, what they actually do, contact person and number, where they came from (Meta lead ad / referral / walk-in), what they sell and roughly what a job is worth to them. Facts you'd otherwise re-type every session.
+      <span class="w">Written once at intake · updated rarely</span></div>
+    </div>
+    <div class="file">
+      <div class="n">THREAD.md</div>
+      <div class="d"><strong>The conversation.</strong> Dated entries, both directions — what they said, what you said, what was promised, what's outstanding. This is the file that answers "she said this, how do I reply." It holds <strong>the context they have of you</strong> as much as the context you have of them.
+      <span class="w">Appended by any agent after any client interaction</span></div>
+    </div>
+    <div class="file">
+      <div class="n">LEDGER.md</div>
+      <div class="d"><strong>The money.</strong> What you quoted, what was agreed, what was invoiced, what's been paid, what's owed, and the offer/price history with reasons. This is where the three PM Technologies invoices get resolved into one truth.
+      <span class="w">Written by business-agent · read by everyone</span></div>
+    </div>
+    <div class="file">
+      <div class="n">WORK.md</div>
+      <div class="d"><strong>What's been delivered.</strong> One section per agent. Web agent built X, here's the absolute path and the live URL. Media buyer ran campaign Y, here's the outcome folder. Content agent made Z. Video editor cut these. Full <code>D:\...</code> paths so anything can jump straight to the real files.
+      <span class="w">Appended by each agent at handoff</span></div>
+    </div>
+    <div class="file">
+      <div class="n">state.md</div>
+      <div class="d"><strong>Where it stands.</strong> Status, the single next action, and what's blocking. This is the one an agent reads to know whether to chase, build, invoice or wait. Follows the same discipline as your existing <code>shared\pickup-handoff.md</code>.
+      <span class="w">Overwritten at every handoff</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="protocol">
+  <h2><span class="num">04</span>The protocol — two lines per agent</h2>
+  <p class="sub">The architecture is worthless without a rule that makes agents use it. This is the whole rule.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>When</th><th>Every agent must</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Before any work</strong></td>
+          <td>If the job names a client, read <code>clients\CLIENT_REGISTRY.csv</code>, resolve the name (including aliases), then read that client's <code>CLIENT.md</code>, <code>state.md</code>, and the <code>WORK.md</code> section relevant to this agent. Never ask Denzel to re-explain who the client is.</td>
+          <td>This is the entire point. Context arrives before the question.</td>
+        </tr>
+        <tr>
+          <td><strong>After any work</strong></td>
+          <td>Append what you did to <code>WORK.md</code>, append any client interaction to <code>THREAD.md</code>, and overwrite <code>state.md</code> with the new status and next action.</td>
+          <td>Without the write-back, the layer goes stale in a week and you're worse off than now.</td>
+        </tr>
+        <tr>
+          <td><strong>On money</strong></td>
+          <td>Only <code>business-agent</code> writes <code>LEDGER.md</code>. Other agents read it and never edit it.</td>
+          <td>One writer means the money record can be trusted.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The lead → client pipeline</h3>
+  <p class="sub" style="margin-bottom:16px">You raised this specifically: web agent should inherit media buyer's context when the client came from a lead ad.</p>
+
+  <div class="flow">
+    <div class="step"><div class="i">1</div><div class="t"><b>Media Buyer runs the lead campaign</b>A lead comes in. It sits in the campaign's outcome folder as a lead, not a client.</div></div>
+    <div class="step"><div class="i">2</div><div class="t"><b>The lead converts</b>Business agent promotes it: creates <code>clients\[slug]\</code>, and <code>CLIENT.md</code> records <code>source: media-buyer / [campaign-slug]</code> with the path back to the campaign.</div></div>
+    <div class="step"><div class="i">3</div><div class="t"><b>Web agent picks it up</b>Reads the client record, follows <code>source</code> back into the campaign, and already knows which ad they responded to and what it promised them — before building a single page.</div></div>
+    <div class="step"><div class="i">4</div><div class="t"><b>Everything after</b>Content, video, invoicing, follow-up — all reading the same record, all writing back to it.</div></div>
+  </div>
+</section>
+
+<section class="wrap" id="brain">
+  <h2><span class="num">05</span>The business agent on top</h2>
+  <p class="sub">The memory layer makes context travel. The business agent is what you actually talk to about money.</p>
+
+  <p>It reads the client record, can reach into any other agent's work for that client, and is backed by the commercial knowledge in your library — Hormozi's offers and money models, GenFlow's sales and pricing, Nik's negotiation and downsell moves.</p>
+
+  <h3>What you ask it</h3>
+  <ul class="tick">
+    <li><b>"Client said this — how do I reply?"</b> It pulls THREAD.md, sees what was promised and what's outstanding, checks LEDGER for the money position, and drafts the reply in your voice with the right posture — chase, hold firm, or concede.</li>
+    <li><b>"What offer do I make here?"</b> Pulls what they do, what a job is worth to them, what you've already built, and what similar clients paid. Then applies the offer frameworks.</li>
+    <li><b>"They said it's too expensive."</b> Runs the downsell ladder — payment plan first, then change what they get. Never the same thing for less.</li>
+    <li><b>"We made this content — how do we monetise it?"</b> Asks content-agent what exists, then works out what it's for: lead magnet, proof asset, retainer deliverable, or the front of a paid offer.</li>
+    <li><b>"The ads are doing this — what now?"</b> Reads Media Buyer's numbers for that client and gives a verdict, not a dashboard.</li>
+    <li><b>"Brief the web agent for me."</b> Writes the brief with client context already loaded, so you don't repeat yourself to the next agent either.</li>
+  </ul>
+
+  <h3>Where it stops, and Strategist starts</h3>
+  <div class="split">
+    <div class="good">
+      <h4>Strategist</h4>
+      <p>Messy, new, cross-domain. Decides <strong>what to do</strong> and which agent does it. Holds you to your commitments. Already live.</p>
+    </div>
+    <div class="good">
+      <h4>Business agent</h4>
+      <p>Decides <strong>what it's worth and what to say.</strong> Money, offers, pricing, replies, negotiation, client relationships. Always anchored to a specific client or a specific number.</p>
+    </div>
+  </div>
+  <p style="font-size:14px;color:var(--ink-dim)">If they ever conflict, Strategist routes and business-agent executes the commercial half. Business agent never invents a client fact — if it isn't in the record, it says so and asks.</p>
+</section>
+
+<section class="wrap" id="first">
+  <h2><span class="num">06</span>What I'd build first</h2>
+  <p class="sub">Not all of it. One thing you can test today.</p>
+
+  <div class="callout gold">
+    <b>Step one: the <code>clients\</code> layer plus real records for the clients that already exist.</b> No new agent yet. Just the registry, the template, and populated folders for PM Technologies, KANS, Deltar, Empire Digital, AT Solutions, Clean View Glass, Wander — built from the CONTEXT.md files, invoices and handover docs already sitting in those folders.
+  </div>
+
+  <h3>How you test it</h3>
+  <p>You open any agent and say <em>"what's the situation with PM Technologies?"</em> — and it tells you what was built, what was invoiced, what's outstanding, what's blocking launch, and what the next move is. Without you explaining anything.</p>
+  <p>If it can't do that, the layer is wrong and we fix it before building anything on top.</p>
+
+  <h3>Then, in order</h3>
+  <ul class="tick">
+    <li><b>Wire the protocol</b> into the existing agents' boot order — two lines each in <code>AGENT_ENTRY.md</code>, plus the write-back in <code>shared\pickup-handoff.md</code>. Media Buyer's own registry gets pointed at the new layer instead of duplicating it.</li>
+    <li><b>Build <code>business-agent</code></b> with one job to start — the reply drafter. Because "client said this, what do I say" is the thing you hit most and it proves the memory layer works end to end.</li>
+    <li><b>Add the commercial specialists</b> — offer, pricing, negotiation — once the reply drafter is being used and the records are staying current.</li>
+  </ul>
+
+  <div class="callout">
+    <b>The one risk worth naming:</b> this only works if the write-back actually happens. A memory layer nobody updates is worse than no memory layer, because you'll trust a stale record. That's why step one is populating from files that already exist — the records start true — and why the write-back goes into the handoff discipline you already follow rather than being a new habit.
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Architecture doc at <code>D:\VIBE CODING\MANUS\planning-with-files\endpoint-media-agent-system\agents\agent-builder\client-memory-architecture.html</code></p>
+  <p>Grounded in the live workspace as of today — 7 folders in <code>CLIENT WORK\</code>, Media Buyer's <code>client-registry.csv</code>, and <code>SYSTEM_ROUTER.md</code>. Nothing built yet.</p>
+</footer>
+
+</body>
+</html>
